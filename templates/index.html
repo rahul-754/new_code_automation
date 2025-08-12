@@ -113,6 +113,16 @@
             box-shadow: 0 5px 15px rgba(86, 171, 47, 0.4);
         }
 
+        .btn-info {
+            background: linear-gradient(135deg, #3a7bd5, #3a6073);
+            color: white;
+        }
+
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(58, 123, 213, 0.4);
+        }
+
         .preview-section {
             padding: 30px;
         }
@@ -379,9 +389,14 @@
             <div class="fields-section">
                 <div class="fields-header">
                     <h2 class="fields-title"><i class="fas fa-list"></i> Selected Fields</h2>
-                    <button id="generateBtn" class="btn btn-success">
-                        <i class="fas fa-code"></i> Generate Python Code
-                    </button>
+                    <div>
+                        <button id="generateTemplateBtn" class="btn btn-info" style="display: none;">
+                            <i class="fas fa-magic"></i> Generate from Template
+                        </button>
+                        <button id="generateBtn" class="btn btn-success">
+                            <i class="fas fa-code"></i> Generate Python Code
+                        </button>
+                    </div>
                 </div>
                 <div id="fieldsContainer">
                     <div class="empty-state" id="emptyState">
@@ -431,6 +446,15 @@
                     doc.write(data.html);
                     doc.close();
 
+                    // Handle template button
+                    const generateTemplateBtn = document.getElementById("generateTemplateBtn");
+                    if (data.template) {
+                        generateTemplateBtn.style.display = "inline-flex";
+                        generateTemplateBtn.dataset.template = data.template;
+                    } else {
+                        generateTemplateBtn.style.display = "none";
+                    }
+
                     // Inject selector.js into iframe
                     const script = doc.createElement("script");
                     script.src = "/static/selector.js";
@@ -454,6 +478,33 @@
                 alert("Error loading page: " + error.message);
             } finally {
                 loadingOverlay.style.display = "none";
+            }
+        });
+
+        document.getElementById("generateTemplateBtn").addEventListener("click", async () => {
+            const template = document.getElementById("generateTemplateBtn").dataset.template;
+            if (!template) {
+                alert("No template selected");
+                return;
+            }
+
+            const generateBtn = document.getElementById("generateTemplateBtn");
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            generateBtn.disabled = true;
+
+            try {
+                const res = await fetch(`/generate_from_template?template=${template}`);
+                const data = await res.json();
+                if (data.error) {
+                    alert("Error generating code: " + data.error);
+                } else {
+                    document.getElementById("generatedCode").textContent = data.code;
+                }
+            } catch (error) {
+                alert("Error generating code: " + error.message);
+            } finally {
+                generateBtn.innerHTML = '<i class="fas fa-magic"></i> Generate from Template';
+                generateBtn.disabled = false;
             }
         });
 
