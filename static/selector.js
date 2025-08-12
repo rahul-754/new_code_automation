@@ -13,10 +13,6 @@
                 parts.unshift(selector);
                 break;
             } else {
-                if (el.className) {
-                    const classes = el.className.trim().split(/\s+/).filter(Boolean).join('.');
-                    if (classes) selector += '.' + classes;
-                }
                 // nth-of-type
                 let sibling = el, nth = 1;
                 while (sibling = sibling.previousElementSibling) {
